@@ -370,12 +370,28 @@
 
     .choice-wrap{ grid-template-columns:1fr; gap:12px; }
   }
+
+  .sound-toggle{
+    position:fixed; top:16px; right:16px; z-index:60;
+    width:40px; height:40px; border-radius:50%;
+    border:1px solid rgba(255,255,255,0.25);
+    background:rgba(7,27,52,0.55); backdrop-filter:blur(6px);
+    color:var(--cream); font-size:17px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition:transform .2s ease, background .2s ease;
+  }
+  .sound-toggle:hover{ transform:scale(1.08); background:rgba(7,27,52,0.8); }
+  .sound-toggle.muted{ opacity:.6; }
 </style>
 </head>
 <body>
 
 <div class="rays"></div>
 <div class="bg-bubbles" id="bgBubbles"></div>
+
+<audio id="bgMusic" src="assets/karma-alien-stage.mp3" loop preload="auto"></audio>
+<button class="sound-toggle" id="soundToggle" aria-label="Bisukan musik">🔊</button>
+
 
 <div class="wrap">
   <header>
@@ -471,7 +487,7 @@
   const messages = [
     "mama tau dulu mama pernah bikin salah. Itu bukan alasan buat mama menghindar dari tanggung jawab.",
     "Tapi mama juga terus belajar dan berusaha jadi lebih baik, buat kamu dan buat kita.",
-    "Kita biasa nya happy, sayang, mama masih inget kita night ride malam itu sambil denger lagu kamu.",
+    "mama gak pernah selingkuh. mama gak pernah bentak atau kasar ke kamu. Itu penting buat mama, kamu tau itu.",
     "mama ngerti kamu masih terluka. mama sabar buat nemenin kamu pulih, secepat atau selambat apapun itu.",
     "mama di sini, gak kemana-mana. mama sayang kamu."
   ];
@@ -595,19 +611,19 @@
       text: 'Pada suatu hari, hiduplah seekor hiu bernama Sharf. Sharf adalah hiu jenis tiger shark, dan hobinya adalah berburu udang. Suatu hari, saat sedang berburu, ia melihat paus besar kesayangannya, Mama Orca, sedang berenang di kejauhan. Sharf memutuskan untuk berenang mendekat.'
     },
     {
-      bg: 'linear-gradient(150deg,#6b7280,#2b0707)',
+      bg: 'linear-gradient(150deg,#6b7280,#400000)',
       text: 'Saat Sharf mendekat, tiba-tiba Mama Orca menggigit siripnya hingga Sharf kesakitan. Sharf kaget, tak paham apa yang terjadi — dan reaksi Mama Orca pun sama kagetnya, seolah ia tak sengaja melmamakannya. Sharf yang sedih dan sakit hati langsung berenang menjauh. Mama Orca ingin mengejar untuk memberi penjelasan, tapi Sharf memasuki gua sempit yang tak muat dimasuki Mama Orca.'
     },
     {
-      bg: 'linear-gradient(150deg,#6b7280,#a0a4e8)',
+      bg: 'linear-gradient(150deg,#6b7280,#97abad)',
       text: 'Di dalam gua itu, Sharf menyendiri, menatapi bekas luka dari Mama Orca. Ia merasa sakit hati dan kecewa — mengapa Mama Orca bisa setega ini padanya? Sejak saat itu, Sharf mulai menjauhi Mama Orca. Dari pengalamannya, orca itu berbahaya, dan ia tak ingin percaya lagi.'
     },
     {
-      bg: 'linear-gradient(150deg,#6b7280,#41736e)',
+      bg: 'linear-gradient(150deg,#6b7280,#545e58)',
       text: 'Namun Sharf merasa kesepian. Ia teringat momen-momen bahagia bersama Mama Orca, bagaimana dulu mereka saling melengkapi. Sharf pun memutuskan untuk mencoba mendekat lagi — penasaran, kalau-kalau ia mau mendengar apa yang sebenarnya ingin disampaikan Mama Orca.'
     },
     {
-      bg: 'linear-gradient(150deg,#7c3aed,#22c55e)',
+      bg: 'linear-gradient(150deg,#7c3aed,#02fab8)',
       text: 'Sharf menemukan Mama Orca terbaring lemas di dasar laut, sirip atasnya layu tanda ia sedang sedih. Ia sedih memikirkan Sharf yang menjauh karena kesalahan yang ia perbuat. Dengan sisa kesabarannya, Sharf memutuskan memberi satu kesempatan pada Mama Orca untuk menjelaskan.'
     },
     {
@@ -707,6 +723,7 @@
   });
 
   choiceLeave.addEventListener('click', () => {
+    stopMusicWithEcho();
     storyBlank.classList.add('show');
   });
 
@@ -714,6 +731,94 @@
     e.preventDefault();
     storyBlank.classList.remove('show');
   });
+
+  /* ===== Background music: autoplay + fade-out-with-echo on "leave" ===== */
+  const bgMusic = document.getElementById('bgMusic');
+  const soundToggle = document.getElementById('soundToggle');
+  let audioCtx, dryGain, wetGain, delayNode, feedbackGain, sourceNode;
+  let audioGraphReady = false;
+  let userMuted = false;
+
+  function buildAudioGraph(){
+    if(audioGraphReady) return;
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    sourceNode = audioCtx.createMediaElementSource(bgMusic);
+
+    dryGain = audioCtx.createGain();
+    dryGain.gain.value = 0.75;
+
+    // echo (delay + feedback) chain, silent until the "leave" moment
+    delayNode = audioCtx.createDelay(2.0);
+    delayNode.delayTime.value = 0.32;
+    feedbackGain = audioCtx.createGain();
+    feedbackGain.gain.value = 0.42;
+    wetGain = audioCtx.createGain();
+    wetGain.gain.value = 0;
+
+    sourceNode.connect(dryGain).connect(audioCtx.destination);
+    sourceNode.connect(delayNode);
+    delayNode.connect(feedbackGain).connect(delayNode);
+    delayNode.connect(wetGain).connect(audioCtx.destination);
+
+    audioGraphReady = true;
+  }
+
+  function tryPlay(){
+    buildAudioGraph();
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+    bgMusic.volume = 1;
+    bgMusic.play().catch((error) => {
+      console.warn('Autoplay blocked:', error);
+      // Autoplay blocked by the browser: start on the first tap/click anywhere
+      const resumeOnce = () => {
+        buildAudioGraph();
+        audioCtx.resume();
+        if(!userMuted) bgMusic.play().catch((err)=>{ console.warn('Play after interaction failed:', err); });
+        document.removeEventListener('click', resumeOnce);
+        document.removeEventListener('touchstart', resumeOnce);
+      };
+      document.addEventListener('click', resumeOnce, {once:true});
+      document.addEventListener('touchstart', resumeOnce, {once:true});
+    });
+  }
+  tryPlay();
+
+  soundToggle.addEventListener('click', () => {
+    userMuted = !userMuted;
+    soundToggle.classList.toggle('muted', userMuted);
+    soundToggle.textContent = userMuted ? '🔇' : '🔊';
+    if(userMuted){
+      bgMusic.pause();
+    } else {
+      buildAudioGraph();
+      if(audioCtx.state === 'suspended') audioCtx.resume();
+      bgMusic.muted = false;
+      bgMusic.play().catch((err)=>{ console.warn('Play on toggle failed:', err); });
+    }
+  });
+
+  function stopMusicWithEcho(){
+    if(bgMusic.paused) return;
+    buildAudioGraph();
+    const now = audioCtx.currentTime;
+    // let the echo bloom in as the dry signal fades out, like the sound trailing away
+    wetGain.gain.cancelScheduledValues(now);
+    wetGain.gain.setValueAtTime(wetGain.gain.value, now);
+    wetGain.gain.linearRampToValueAtTime(0.55, now + 0.5);
+
+    dryGain.gain.cancelScheduledValues(now);
+    dryGain.gain.setValueAtTime(dryGain.gain.value, now);
+    dryGain.gain.linearRampToValueAtTime(0, now + 1.6);
+
+    // let the echo tail ring out, then fade it too and stop playback
+    wetGain.gain.setValueAtTime(0.55, now + 1.6);
+    wetGain.gain.linearRampToValueAtTime(0, now + 3.4);
+
+    setTimeout(() => {
+      bgMusic.pause();
+      bgMusic.currentTime = 0;
+    }, 3500);
+  }
 </script>
 
 </body>
