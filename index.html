@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Untuk Kamu, di Bawah Laut Ini</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --deep:#071b34;
+    --mid:#0e3a5c;
+    --teal:#1a6f86;
+    --aqua:#6fe4d6;
+    --sun:#ffd76e;
+    --coral:#ff8fa8;
+    --cream:#fff8ec;
+    --ink:#0b1e3d;
+    --foam:rgba(255,255,255,0.85);
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0;padding:0;height:100%;
+    font-family:'Quicksand',sans-serif;
+    background:linear-gradient(180deg,var(--deep) 0%, var(--mid) 45%, var(--teal) 100%);
+    overflow-x:hidden;
+    color:var(--cream);
+  }
+  h1,h2,.display{font-family:'Baloo 2',cursive;}
+
+  /* Sunlight rays */
+  .rays{
+    position:fixed;top:-20%;left:50%;
+    width:160vw;height:160vh;
+    transform:translateX(-50%);
+    background:conic-gradient(from 200deg at 50% 0%,
+      transparent 0deg, rgba(255,255,255,0.06) 8deg, transparent 16deg,
+      transparent 40deg, rgba(255,255,255,0.05) 48deg, transparent 56deg,
+      transparent 90deg, rgba(255,255,255,0.07) 98deg, transparent 106deg);
+    animation:sway 18s ease-in-out infinite;
+    pointer-events:none;
+    z-index:0;
+  }
+  @keyframes sway{
+    0%,100%{transform:translateX(-50%) rotate(-3deg);}
+    50%{transform:translateX(-50%) rotate(3deg);}
+  }
+
+  .wrap{position:relative;z-index:2;max-width:980px;margin:0 auto;padding:48px 20px 100px;}
+
+  header{text-align:center;margin-bottom:8px;}
+  .eyebrow{
+    letter-spacing:.14em;text-transform:uppercase;font-size:12px;
+    color:var(--aqua);opacity:.85;font-weight:600;
+  }
+  h1{
+    font-size:clamp(28px,5vw,44px);
+    margin:10px 0 6px;
+    color:var(--cream);
+    text-shadow:0 4px 24px rgba(0,0,0,.35);
+  }
+  .sub{
+    color:rgba(255,248,236,0.75);
+    font-size:15px;max-width:520px;margin:0 auto;line-height:1.6;
+  }
+
+  /* decorative rising bubbles */
+  .bg-bubbles span{
+    position:fixed;bottom:-40px;border-radius:50%;
+    background:radial-gradient(circle at 30% 30%, rgba(255,255,255,0.55), rgba(255,255,255,0.05));
+    animation:rise linear infinite;
+    z-index:1;pointer-events:none;
+  }
+  @keyframes rise{
+    to{transform:translateY(-120vh) translateX(var(--drift,20px)); opacity:0;}
+  }
+
+  /* ocean scene */
+  .scene{
+    position:relative;
+    height:400px;
+    margin:36px 0 8px;
+    border-radius:28px;
+    background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.15));
+    border:1px solid rgba(255,255,255,0.08);
+    overflow:hidden;
+  }
+  .seabed{
+    position:absolute;bottom:0;left:0;right:0;height:38px;
+    background:linear-gradient(180deg, transparent, rgba(0,0,0,0.35));
+  }
+
+  .critter{
+    position:absolute;bottom:60px;
+    height:auto;
+    transition:left 900ms cubic-bezier(.34,1.3,.4,1), transform .6s ease;
+    filter:drop-shadow(0 10px 16px rgba(0,0,0,0.35));
+  }
+  .critter img{ display:block; width:100%; height:auto; }
+  .orca-wrap{ left:6%; width:220px; bottom:52px; animation:bob 3.4s ease-in-out infinite; }
+  .shark-wrap{ left:74%; width:110px; bottom:66px; animation:bob 3.9s ease-in-out infinite .3s; }
+  @keyframes bob{
+    0%,100%{transform:translateY(0);}
+    50%{transform:translateY(-10px);}
+  }
+  .critter.swim{ transform:scaleX(-1) translateY(-10px); }
+
+  .label{
+    position:absolute;bottom:12px;width:150px;text-align:center;
+    font-size:12px;letter-spacing:.08em;text-transform:uppercase;
+    color:rgba(255,248,236,.65);font-weight:600;
+  }
+  .orca-wrap .label{left:6%;}
+  .shark-wrap .label{left:74%;}
+
+  /* mood badge over shark photo, since a photo can't morph expression */
+  .shark-wrap{ position:absolute; }
+  .mood-badge{
+    position:absolute; top:-6px; right:6px;
+    font-size:22px; opacity:0; transform:scale(.4) rotate(-15deg);
+    transition:opacity .5s ease, transform .5s cubic-bezier(.34,1.56,.64,1);
+    filter:drop-shadow(0 4px 6px rgba(0,0,0,.3));
+  }
+  .shark-wrap.happy .mood-badge{ opacity:1; transform:scale(1) rotate(0deg); animation:badgePulse 1.6s ease-in-out infinite; }
+  .shark-wrap.happy img{ filter:saturate(1.15) brightness(1.04); }
+  @keyframes badgePulse{
+    0%,100%{ transform:scale(1) rotate(0deg); }
+    50%{ transform:scale(1.15) rotate(4deg); }
+  }
+
+  /* bubbles (messages) */
+  .bubble{
+    position:absolute;
+    width:46px;height:46px;border-radius:50%;
+    background:radial-gradient(circle at 32% 30%, rgba(255,255,255,0.9), rgba(255,255,255,0.15));
+    border:1px solid rgba(255,255,255,0.5);
+    box-shadow:0 6px 14px rgba(0,0,0,0.25), inset 0 0 12px rgba(255,255,255,0.4);
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    animation:float 3.2s ease-in-out infinite;
+    transition:transform .3s ease, opacity .4s ease;
+  }
+  .bubble:hover{ transform:scale(1.12); }
+  .bubble.popped{ opacity:0; transform:scale(1.6); pointer-events:none; }
+  .bubble svg{width:20px;height:20px;opacity:.75;}
+  @keyframes float{
+    0%,100%{transform:translateY(0);}
+    50%{transform:translateY(-8px);}
+  }
+
+  .progress-row{
+    display:flex;align-items:center;gap:10px;justify-content:center;margin:18px 0 6px;
+  }
+  .dot{
+    width:10px;height:10px;border-radius:50%;
+    background:rgba(255,255,255,0.25);
+    transition:background .3s ease, transform .3s ease;
+  }
+  .dot.filled{ background:var(--sun); transform:scale(1.2); }
+  .hint{
+    text-align:center;color:rgba(255,248,236,0.6);font-size:13px;margin-top:2px;
+  }
+
+  /* message overlay */
+  .overlay{
+    position:fixed;inset:0;background:rgba(4,14,28,0.55);
+    backdrop-filter:blur(3px);
+    display:flex;align-items:center;justify-content:center;
+    opacity:0;pointer-events:none;transition:opacity .35s ease;
+    z-index:50;padding:20px;
+  }
+  .overlay.show{opacity:1;pointer-events:auto;}
+  .msg-card{
+    background:var(--cream);color:var(--ink);
+    max-width:420px;width:100%;
+    border-radius:22px;padding:28px 26px 22px;
+    box-shadow:0 24px 60px rgba(0,0,0,0.4);
+    transform:translateY(16px) scale(.96);
+    transition:transform .35s ease;
+    text-align:center;
+  }
+  .overlay.show .msg-card{ transform:translateY(0) scale(1); }
+  .msg-card .icon{font-size:30px;margin-bottom:6px;}
+  .msg-card p{font-size:16.5px;line-height:1.65;margin:8px 0 18px;}
+  .btn{
+    border:none;border-radius:999px;padding:11px 26px;
+    font-family:'Quicksand',sans-serif;font-weight:700;font-size:14px;
+    background:var(--teal);color:var(--cream);cursor:pointer;
+    transition:transform .2s ease, background .2s ease;
+  }
+  .btn:hover{ transform:translateY(-2px); background:var(--mid); }
+  .btn.coral{ background:var(--coral); color:var(--ink); }
+
+  /* hearts burst */
+  .hearts{position:absolute;inset:0;pointer-events:none;overflow:visible;}
+  .heart{
+    position:absolute;font-size:20px;opacity:0;
+    animation:heartUp 2.2s ease-out forwards;
+  }
+  @keyframes heartUp{
+    0%{opacity:0; transform:translateY(0) scale(.6);}
+    15%{opacity:1;}
+    100%{opacity:0; transform:translateY(-140px) scale(1.2);}
+  }
+
+  /* final letter */
+  .finale{
+    max-width:600px;margin:26px auto 0;
+    background:linear-gradient(180deg, var(--cream), #fff3e0);
+    color:var(--ink);border-radius:26px;
+    padding:34px 30px;
+    box-shadow:0 24px 60px rgba(0,0,0,0.35);
+    opacity:0;transform:translateY(24px);
+    transition:opacity .7s ease, transform .7s ease;
+  }
+  .finale.show{opacity:1;transform:translateY(0);}
+  .finale h2{font-size:22px;margin:0 0 4px;color:var(--ink);}
+  .finale .tag{font-size:12px;color:var(--teal);text-transform:uppercase;letter-spacing:.1em;font-weight:700;}
+  .finale .letter{
+    margin-top:16px;font-size:16px;line-height:1.75;
+    outline:none;border-radius:14px;padding:6px 4px;
+  }
+  .finale .letter:focus{ background:rgba(26,111,134,0.06); }
+  .edit-hint{font-size:12px;color:#8a8578;margin-top:10px;text-align:right;}
+  .signoff{margin-top:20px;font-family:'Baloo 2',cursive;font-size:20px;color:var(--coral);text-align:right;}
+
+  footer{
+    text-align:center;margin-top:34px;color:rgba(255,248,236,0.4);font-size:12px;
+  }
+
+  /* ===== Storybook ===== */
+  .story-section{ margin-top:56px; }
+  .story-header{ text-align:center; margin-bottom:22px; }
+  .story-header .eyebrow{ color:var(--sun); }
+  .story-header h2{ font-size:clamp(22px,4vw,30px); margin:8px 0 6px; color:var(--cream); }
+  .story-header p{ color:rgba(255,248,236,0.72); font-size:14px; max-width:480px; margin:0 auto; }
+
+  .book{
+    position:relative;
+    max-width:520px; margin:0 auto;
+    height:420px;
+    perspective:1600px;
+  }
+  .page-inner{
+    position:absolute; inset:0;
+    border-radius:20px;
+    padding:34px 30px;
+    display:flex; flex-direction:column; justify-content:space-between;
+    box-shadow:0 26px 50px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.15);
+    transform-origin:left center;
+    transform:rotateY(0deg);
+    opacity:1;
+    transition:transform .55s cubic-bezier(.5,0,.5,1), opacity .55s ease;
+    color:#fff;
+  }
+  .page-inner::before{
+    content:'';
+    position:absolute; left:0; top:0; bottom:0; width:26px;
+    background:linear-gradient(90deg, rgba(0,0,0,0.22), transparent);
+    border-radius:20px 0 0 20px;
+  }
+  .page-inner.flip-out-next{ transform:rotateY(-110deg); opacity:0; }
+  .page-inner.flip-out-prev{ transform:rotateY(110deg); opacity:0; }
+  .page-inner.flip-in{ transform:rotateY(0deg); opacity:1; }
+
+  .page-tag{
+    font-family:'Baloo 2',cursive; font-size:13px; letter-spacing:.08em;
+    text-transform:uppercase; opacity:.75;
+  }
+  .page-text{
+    font-size:16.5px; line-height:1.75; overflow-y:auto; margin-top:14px;
+    text-shadow:0 2px 8px rgba(0,0,0,0.25);
+  }
+  .page-num{ align-self:flex-end; font-size:12px; opacity:.7; font-family:'Baloo 2',cursive; }
+
+  .book-nav{
+    display:flex; align-items:center; justify-content:center; gap:16px;
+    margin-top:20px;
+  }
+  .nav-btn{
+    border:none; border-radius:999px; padding:10px 20px;
+    background:rgba(255,255,255,0.12); color:var(--cream);
+    font-family:'Quicksand',sans-serif; font-weight:700; font-size:13px;
+    cursor:pointer; transition:background .2s ease, transform .2s ease;
+    border:1px solid rgba(255,255,255,0.2);
+  }
+  .nav-btn:hover:not(:disabled){ background:rgba(255,255,255,0.22); transform:translateY(-2px); }
+  .nav-btn:disabled{ opacity:.3; cursor:default; }
+  .page-dots{ display:flex; gap:6px; }
+  .page-dots .pdot{ width:7px; height:7px; border-radius:50%; background:rgba(255,255,255,0.25); transition:all .3s ease; }
+  .page-dots .pdot.active{ background:var(--sun); width:18px; border-radius:5px; }
+
+  /* choice cards */
+  .choice-wrap{
+    display:none;
+    max-width:560px; margin:30px auto 0;
+    gap:18px; grid-template-columns:1fr 1fr;
+  }
+  .choice-wrap.show{ display:grid; }
+  .choice-card{
+    border-radius:20px; padding:26px 20px; text-align:center;
+    cursor:pointer; border:1px solid rgba(255,255,255,0.18);
+    transition:transform .25s ease, box-shadow .25s ease;
+    color:#fff;
+  }
+  .choice-card:hover{ transform:translateY(-4px); box-shadow:0 16px 34px rgba(0,0,0,0.35); }
+  .choice-card .cicon{ font-size:30px; margin-bottom:8px; }
+  .choice-card h3{ font-family:'Baloo 2',cursive; margin:0 0 6px; font-size:18px; }
+  .choice-card p{ font-size:13px; opacity:.85; margin:0; line-height:1.5; }
+  .choice-forgive{ background:linear-gradient(135deg,#2b6cb0,#22d3ee); }
+  .choice-leave{ background:linear-gradient(135deg,#52525b,#27272a); }
+
+  .story-ending{
+    display:none;
+    max-width:520px; margin:26px auto 0;
+    border-radius:22px; padding:36px 30px; text-align:center;
+    background:linear-gradient(135deg,#2b6cb0,#22d3ee);
+    color:#fff; box-shadow:0 24px 50px rgba(0,0,0,0.4);
+    position:relative; overflow:hidden;
+  }
+  .story-ending.show{ display:block; animation:endingIn .6s ease; }
+  @keyframes endingIn{ from{opacity:0; transform:translateY(18px) scale(.97);} to{opacity:1; transform:translateY(0) scale(1);} }
+  .story-ending .cicon{ font-size:36px; }
+  .story-ending p{ font-size:16.5px; line-height:1.7; margin-top:10px; }
+  .float-heart{
+    position:absolute; bottom:-10px; font-size:18px; opacity:0;
+    animation:floatH 3s ease-in forwards;
+  }
+  @keyframes floatH{
+    0%{opacity:0; transform:translateY(0) scale(.6);}
+    15%{opacity:.9;}
+    100%{opacity:0; transform:translateY(-220px) scale(1.1);}
+  }
+
+  .story-blank{
+    display:none;
+    position:fixed; inset:0; background:#ffffff; z-index:200;
+  }
+  .story-blank.show{ display:block; }
+  .story-blank .quiet-reset{
+    position:absolute; bottom:14px; right:16px;
+    font-size:11px; color:rgba(0,0,0,0.15);
+    text-decoration:none; letter-spacing:.05em;
+    transition:color .3s ease;
+  }
+  .story-blank .quiet-reset:hover{ color:rgba(0,0,0,0.4); }
+
+  /* ===== Mobile: give the ocean scene breathing room ===== */
+  @media (max-width:480px){
+    .wrap{ padding:32px 14px 80px; }
+    h1{ font-size:22px; }
+    .sub{ font-size:13px; padding:0 6px; }
+
+    .scene{ height:260px; border-radius:20px; margin:26px 0 6px; }
+
+    .orca-wrap{ width:128px; bottom:34px; }
+    .shark-wrap{ width:64px; bottom:44px; }
+
+    .label{ font-size:9px; width:120px; letter-spacing:.05em; bottom:8px; }
+
+    .bubble{ width:30px; height:30px; }
+    .bubble svg{ width:13px; height:13px; }
+
+    .mood-badge{ font-size:16px; top:-4px; right:2px; }
+
+    .story-header p{ font-size:13px; }
+    .book{ height:380px; }
+    .page-inner{ padding:26px 22px; border-radius:16px; }
+    .page-text{ font-size:15px; }
+
+    .choice-wrap{ grid-template-columns:1fr; gap:12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="rays"></div>
+<div class="bg-bubbles" id="bgBubbles"></div>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Sebuah pesan dari dasar laut</div>
+    <h1>Di antara arus yang keruh,<br>mama masih berenang ke arahmu</h1>
+    <p class="sub">Pecahkan gelembung-gelembungnya satu per satu. Setiap satu berisi hal yang pengen mama bilang ke kamu, sebelum mama sampai di sisimu.</p>
+  </header>
+
+  <div class="scene" id="scene">
+    <div class="seabed"></div>
+
+    <div class="critter orca-wrap" id="orcaWrap">
+      <img src="assets/orca.png" alt="Orca">
+    </div>
+    <div class="label" style="left:6%;">Kamu Kenal mama</div>
+
+    <div class="critter shark-wrap" id="sharkWrap">
+      <img src="assets/shark.png" alt="Hiu">
+      <div class="mood-badge">🩵</div>
+    </div>
+    <div class="label" style="left:74%;">Dia yang Kusayang</div>
+
+    <div class="hearts" id="heartsLayer"></div>
+  </div>
+
+  <div class="progress-row" id="progressRow"></div>
+  <div class="hint" id="hintText">Sentuh gelembungnya, satu-satu ya.</div>
+
+  <section class="story-section">
+    <div class="story-header">
+      <div class="eyebrow">Cerita di dasar laut</div>
+      <h2>Sharf &amp; Mama Orca</h2>
+      <p>Buka halamannya satu-satu, kayak buku beneran.</p>
+    </div>
+
+    <div class="book" id="book">
+      <div class="page-inner" id="pageInner">
+        <div class="page-tag" id="pageTag">Halaman 1</div>
+        <div class="page-text" id="pageText"></div>
+        <div class="page-num" id="pageNum">1 / 7</div>
+      </div>
+    </div>
+
+    <div class="book-nav">
+      <button class="nav-btn" id="prevPage">‹ Sebelumnya</button>
+      <div class="page-dots" id="pageDots"></div>
+      <button class="nav-btn" id="nextPage">Selanjutnya ›</button>
+    </div>
+
+    <div class="choice-wrap" id="choiceWrap">
+      <div class="choice-card choice-forgive" id="choiceForgive">
+        <div class="cicon">🩵</div>
+        <h3>Maafkan Mama Orca</h3>
+        <p>Sharf memilih dengar penjelasannya sampai habis, dan percaya lagi.</p>
+      </div>
+      <div class="choice-card choice-leave" id="choiceLeave">
+        <div class="cicon">🌫️</div>
+        <h3>Tinggalkan Mama Orca</h3>
+        <p>Sharf memilih pergi, dan tidak kembali lagi.</p>
+      </div>
+    </div>
+
+    <div class="story-ending" id="storyEnding">
+      <div class="cicon">🐋🦈</div>
+      <p>Sharf adalah seekor hiu yang baik hati dan cerdas. Sharf memaafkan mama orca, yang sebenarnya masih sayang sekali sama Sharf.</p>
+    </div>
+  </section>
+
+  <div class="finale" id="finale">
+    <div class="tag">Sudah sampai</div>
+    <h2>Buat kamu, hiu kecilku 🩵</h2>
+    <div class="letter" contenteditable="true" id="letterBox">Maafin mama ya. mama tau dulu mama pernah salah, dan mama gak akan lari dari itu. Tapi mama juga gak pernah selingkuh, gak pernah bentak atau kasar ke kamu — dan mama gak mau kesalahpahaman ini yang malah bikin kita pisah. mama masih di sini, berenang ke arah kamu, sesabar apapun perlu waktunya.</div>
+    <div class="edit-hint">✏️ ketuk tulisannya buat ubah jadi kata-katamu sendiri</div>
+    <div class="signoff">— orca-mu</div>
+  </div>
+
+  <footer>dibuat dengan hati-hati, buat sesuatu yang penting.</footer>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="msg-card">
+    <div class="icon">🫧</div>
+    <p id="overlayText"></p>
+    <button class="btn" id="overlayBtn">Lanjut</button>
+  </div>
+</div>
+
+<div class="story-blank" id="storyBlank">
+  <a href="#" class="quiet-reset" id="quietReset">↺</a>
+</div>
+
+<script>
+  const messages = [
+    "mama tau dulu mama pernah bikin salah. Itu bukan alasan buat mama menghindar dari tanggung jawab.",
+    "Tapi mama juga terus belajar dan berusaha jadi lebih baik, buat kamu dan buat kita.",
+    "Kita biasa nya happy, sayang, mama masih inget kita night ride malam itu sambil denger lagu kamu.",
+    "mama ngerti kamu masih terluka. mama sabar buat nemenin kamu pulih, secepat atau selambat apapun itu.",
+    "mama di sini, gak kemana-mana. mama sayang kamu."
+  ];
+
+  const scene = document.getElementById('scene');
+  const orcaWrap = document.getElementById('orcaWrap');
+  const sharkWrap = document.getElementById('sharkWrap');
+  const overlay = document.getElementById('overlay');
+  const overlayText = document.getElementById('overlayText');
+  const overlayBtn = document.getElementById('overlayBtn');
+  const progressRow = document.getElementById('progressRow');
+  const hintText = document.getElementById('hintText');
+  const finale = document.getElementById('finale');
+  const heartsLayer = document.getElementById('heartsLayer');
+
+  let popped = 0;
+  const total = messages.length;
+
+  // progress dots
+  for(let i=0;i<total;i++){
+    const d = document.createElement('div');
+    d.className = 'dot';
+    d.id = 'dot'+i;
+    progressRow.appendChild(d);
+  }
+
+  // place bubbles between orca (~6-26%) and shark (~74%)
+  const positions = [
+    {left:'28%', bottom:'40%'},
+    {left:'41%', bottom:'22%'},
+    {left:'52%', bottom:'50%'},
+    {left:'63%', bottom:'28%'},
+    {left:'71%', bottom:'44%'},
+  ];
+
+  let pendingIndex = null;
+
+  positions.forEach((pos, i) => {
+    const b = document.createElement('div');
+    b.className = 'bubble';
+    b.style.left = pos.left;
+    b.style.bottom = pos.bottom;
+    b.style.animationDelay = (i*0.4)+'s';
+    b.dataset.index = i;
+    b.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#0e3a5c" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg>';
+    b.addEventListener('click', () => popBubble(b, i));
+    scene.appendChild(b);
+  });
+
+  function popBubble(el, i){
+    if(el.classList.contains('popped')) return;
+    el.classList.add('popped');
+    pendingIndex = i;
+    overlayText.textContent = messages[i];
+    overlay.classList.add('show');
+  }
+
+  overlayBtn.addEventListener('click', () => {
+    overlay.classList.remove('show');
+    if(pendingIndex !== null){
+      popped++;
+      document.getElementById('dot'+pendingIndex).classList.add('filled');
+      moveOrca();
+      pendingIndex = null;
+      if(popped >= total){
+        setTimeout(finish, 700);
+      } else {
+        hintText.textContent = (total - popped) + ' gelembung lagi.';
+      }
+    }
+  });
+
+  function moveOrca(){
+    const pct = popped/total; // 0..1
+    const leftPct = 6 + pct*62; // from 6% to ~68%
+    orcaWrap.style.left = leftPct + '%';
+    document.querySelector('.orca-wrap .label').style.left = leftPct + '%';
+    if(pct > 0.15) orcaWrap.classList.add('swim');
+  }
+
+  function spawnHearts(){
+    for(let i=0;i<10;i++){
+      const h = document.createElement('div');
+      h.className = 'heart';
+      h.textContent = ['🩵','💙','🫧'][i%3];
+      h.style.left = (55 + Math.random()*20) + '%';
+      h.style.bottom = (70 + Math.random()*40) + 'px';
+      h.style.animationDelay = (Math.random()*0.6)+'s';
+      heartsLayer.appendChild(h);
+      setTimeout(()=>h.remove(), 2600);
+    }
+  }
+
+  function finish(){
+    hintText.textContent = 'Kamu sampai. 🫧';
+    sharkWrap.classList.add('happy');
+    spawnHearts();
+    setTimeout(spawnHearts, 500);
+    finale.classList.add('show');
+    finale.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+
+  // decorative background bubbles
+  const bg = document.getElementById('bgBubbles');
+  for(let i=0;i<18;i++){
+    const s = document.createElement('span');
+    const size = 6 + Math.random()*16;
+    s.style.width = size+'px';
+    s.style.height = size+'px';
+    s.style.left = Math.random()*100+'vw';
+    s.style.setProperty('--drift', (Math.random()*60-30)+'px');
+    s.style.animationDuration = (10+Math.random()*14)+'s';
+    s.style.animationDelay = (Math.random()*10)+'s';
+    bg.appendChild(s);
+  }
+
+  /* ===== Storybook: Sharf & Mama Orca ===== */
+  const storyPages = [
+    {
+      bg: 'linear-gradient(150deg,#2b6cb0,#22d3ee)',
+      text: 'Pada suatu hari, hiduplah seekor hiu bernama Sharf. Sharf adalah hiu jenis tiger shark, dan hobinya adalah berburu udang. Suatu hari, saat sedang berburu, ia melihat paus besar kesayangannya, Mama Orca, sedang berenang di kejauhan. Sharf memutuskan untuk berenang mendekat.'
+    },
+    {
+      bg: 'linear-gradient(150deg,#6b7280,#2b0707)',
+      text: 'Saat Sharf mendekat, tiba-tiba Mama Orca menggigit siripnya hingga Sharf kesakitan. Sharf kaget, tak paham apa yang terjadi — dan reaksi Mama Orca pun sama kagetnya, seolah ia tak sengaja melmamakannya. Sharf yang sedih dan sakit hati langsung berenang menjauh. Mama Orca ingin mengejar untuk memberi penjelasan, tapi Sharf memasuki gua sempit yang tak muat dimasuki Mama Orca.'
+    },
+    {
+      bg: 'linear-gradient(150deg,#6b7280,#a0a4e8)',
+      text: 'Di dalam gua itu, Sharf menyendiri, menatapi bekas luka dari Mama Orca. Ia merasa sakit hati dan kecewa — mengapa Mama Orca bisa setega ini padanya? Sejak saat itu, Sharf mulai menjauhi Mama Orca. Dari pengalamannya, orca itu berbahaya, dan ia tak ingin percaya lagi.'
+    },
+    {
+      bg: 'linear-gradient(150deg,#6b7280,#41736e)',
+      text: 'Namun Sharf merasa kesepian. Ia teringat momen-momen bahagia bersama Mama Orca, bagaimana dulu mereka saling melengkapi. Sharf pun memutuskan untuk mencoba mendekat lagi — penasaran, kalau-kalau ia mau mendengar apa yang sebenarnya ingin disampaikan Mama Orca.'
+    },
+    {
+      bg: 'linear-gradient(150deg,#7c3aed,#22c55e)',
+      text: 'Sharf menemukan Mama Orca terbaring lemas di dasar laut, sirip atasnya layu tanda ia sedang sedih. Ia sedih memikirkan Sharf yang menjauh karena kesalahan yang ia perbuat. Dengan sisa kesabarannya, Sharf memutuskan memberi satu kesempatan pada Mama Orca untuk menjelaskan.'
+    },
+    {
+      bg: 'linear-gradient(150deg,#0f172a,#334155)',
+      text: 'Mama Orca bercerita: saat itu ia sedang bertarung dengan hiu putih besar, berpindah posisi sambil mencari lawan yang bersembunyi. Adrenalinnya tinggi dan ia sedang sangat stres. Saat Sharf mendekat, ia salah sangka mengira Sharf adalah hiu putih itu — dan tanpa sengaja melukainya.'
+    },
+    {
+      bg: 'linear-gradient(150deg,#0e7490,#c084fc)',
+      text: 'Sekarang Sharf paham apa yang terjadi pada Mama Orca. Meski begitu, Mama Orca tetap ingin merawat luka Sharf. Ia membantu Sharf menangkap udang karena siripnya masih sakit untuk berenang, dan melindunginya dari kawanan lumba-lumba yang jahil.'
+    }
+  ];
+
+  const pageInner = document.getElementById('pageInner');
+  const pageTag = document.getElementById('pageTag');
+  const pageText = document.getElementById('pageText');
+  const pageNum = document.getElementById('pageNum');
+  const prevBtn = document.getElementById('prevPage');
+  const nextBtn = document.getElementById('nextPage');
+  const pageDots = document.getElementById('pageDots');
+  const choiceWrap = document.getElementById('choiceWrap');
+  const choiceForgive = document.getElementById('choiceForgive');
+  const choiceLeave = document.getElementById('choiceLeave');
+  const storyEnding = document.getElementById('storyEnding');
+  const storyBlank = document.getElementById('storyBlank');
+  const quietReset = document.getElementById('quietReset');
+
+  let storyIdx = 0;
+  let isFlipping = false;
+
+  storyPages.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'pdot';
+    d.id = 'pdot'+i;
+    pageDots.appendChild(d);
+  });
+
+  function renderPage(){
+    pageInner.style.background = storyPages[storyIdx].bg;
+    pageTag.textContent = 'Halaman ' + (storyIdx+1);
+    pageText.textContent = storyPages[storyIdx].text;
+    pageNum.textContent = (storyIdx+1) + ' / ' + storyPages.length;
+    document.querySelectorAll('.pdot').forEach((d,i)=> d.classList.toggle('active', i===storyIdx));
+    prevBtn.disabled = storyIdx === 0;
+    nextBtn.textContent = storyIdx === storyPages.length-1 ? 'Lanjut ke pilihan ›' : 'Selanjutnya ›';
+  }
+  renderPage();
+
+  function flipTo(newIdx, direction){
+    if(isFlipping) return;
+    isFlipping = true;
+    pageInner.classList.add(direction === 'next' ? 'flip-out-next' : 'flip-out-prev');
+    setTimeout(() => {
+      storyIdx = newIdx;
+      renderPage();
+      pageInner.classList.remove('flip-out-next','flip-out-prev');
+      pageInner.style.transform = direction === 'next' ? 'rotateY(90deg)' : 'rotateY(-90deg)';
+      pageInner.style.opacity = '0';
+      requestAnimationFrame(() => {
+        pageInner.classList.add('flip-in');
+        pageInner.style.transform = '';
+        pageInner.style.opacity = '';
+        setTimeout(() => { pageInner.classList.remove('flip-in'); isFlipping = false; }, 560);
+      });
+    }, 300);
+  }
+
+  nextBtn.addEventListener('click', () => {
+    if(isFlipping) return;
+    if(storyIdx < storyPages.length - 1){
+      flipTo(storyIdx+1, 'next');
+    } else {
+      document.getElementById('book').style.display = 'none';
+      document.querySelector('.book-nav').style.display = 'none';
+      choiceWrap.classList.add('show');
+      choiceWrap.scrollIntoView({behavior:'smooth', block:'center'});
+    }
+  });
+
+  prevBtn.addEventListener('click', () => {
+    if(isFlipping || storyIdx === 0) return;
+    flipTo(storyIdx-1, 'prev');
+  });
+
+  choiceForgive.addEventListener('click', () => {
+    choiceWrap.classList.remove('show');
+    storyEnding.classList.add('show');
+    for(let i=0;i<8;i++){
+      const h = document.createElement('div');
+      h.className = 'float-heart';
+      h.textContent = ['🩵','💙','✨'][i%3];
+      h.style.left = (10 + Math.random()*80) + '%';
+      h.style.animationDelay = (Math.random()*0.8)+'s';
+      storyEnding.appendChild(h);
+      setTimeout(()=>h.remove(), 3200);
+    }
+    storyEnding.scrollIntoView({behavior:'smooth', block:'center'});
+  });
+
+  choiceLeave.addEventListener('click', () => {
+    storyBlank.classList.add('show');
+  });
+
+  quietReset.addEventListener('click', (e) => {
+    e.preventDefault();
+    storyBlank.classList.remove('show');
+  });
+</script>
+
+</body>
+</html>
